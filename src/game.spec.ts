@@ -15,8 +15,8 @@ describe("Game", ()=> {
         const player1 = new Player("Henry");
         const player2 = new Player("Jeff");
         const game = new Game([player1, player2]);
-        const x = 1;
-        const y = 1;
+        const x = 4;
+        const y = 4;
         const tileIdx = 0;
         game.setTileAt(new Tile(0), 3, 3);
         game.placeTile(player1, tileIdx, x, y);

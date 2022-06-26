@@ -54,10 +54,13 @@ export class Game {
             // .slice(1) // remove 0 value tile to put in middle of board
             .sort(() => Math.random() - 0.5) // shuffle
             .map(val => new Tile(val));
-        this.setupBoardPerimeter();
-        this.setupBoardCentre();
         this.players = players;
         this.distributeTiles(4);
+    }
+
+    setupBoard() {
+        this.setupBoardPerimeter();
+        this.setupBoardCentre();
     }
 
     private setupBoardCentre() {
@@ -65,6 +68,8 @@ export class Game {
         this.setTileAt(this.drawPile.pop(), 5, 2)
         this.setTileAt(this.drawPile.pop(), 2, 5)
         this.setTileAt(this.drawPile.pop(), 5, 5)
+        this.setTileAt(this.drawPile.pop(), 3, 3)
+        this.setTileAt(this.drawPile.pop(), 4, 4)
     }
 
     private setupBoardPerimeter() {
