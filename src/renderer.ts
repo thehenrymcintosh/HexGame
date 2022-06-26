@@ -90,6 +90,9 @@ export class Renderer {
             else this.ctx.fillStyle = "black";
             this.ctx.fillText(`${player.name}: ${player.points}`, x, y);
         })
+        this.ctx.fillStyle = "black";
+        this.ctx.fillText(`Tiles remaining: ${game.tilesRemaining}`, this.canvas.width - 450, 20);
+
         this.ctx.strokeStyle = "slateGrey";
 
         this.getElements(game).forEach(element => element.draw(this.ctx));

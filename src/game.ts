@@ -59,6 +59,10 @@ export class Game {
         this.distributeTiles(4);
     }
 
+    get tilesRemaining() {
+        return this.drawPile.length;
+    }
+
     get board() {
         return this._board.slice();
     }
