@@ -1,5 +1,6 @@
 import {Game} from "./game";
 import {Tile} from "./tile";
+import {isUndefined} from "./utils";
 
 const deg60 = Math.PI / 3;
 const deg30 = Math.PI / 6;
@@ -11,6 +12,8 @@ interface Drawable {
 interface Clickable {
     isWithinBounds(point: { x: number, y: number} ): boolean;
 }
+
+type Element = Drawable & Clickable;
 
 export class Renderer {
     private canvas = document.getElementById('main') as HTMLCanvasElement;
@@ -45,23 +48,9 @@ export class Renderer {
             this.mousePosition.y = e.clientY - rect.top;
             const clickedElement = elements.find(element => element.isWithinBounds(this.mousePosition));
             if (clickedElement) {
-                const { tile, tileIdx } = (clickedElement as UnplayedTileRenderer);
-                const { gridX, gridY } = (clickedElement as HexagonRenderer);
-                if (tile && typeof tileIdx !== "undefined") {
-                    this.focussedTile = tile;
-                    this.focussedTileIdx = tileIdx;
-                } else if (typeof gridX !== "undefined" && typeof gridY !== "undefined" ) {
-                    // must be hexagon;
-                    if (this.focussedTile && typeof this.focussedTileIdx !== "undefined") {
-                        this.game.placeTile(this.game.currentPlayer, this.focussedTileIdx, gridX, gridY);
-
-                        this.focussedTile = undefined;
-                        this.focussedTileIdx = undefined;
-                    }
-                }
+                this.handleClickOnElement(clickedElement);
             } else {
-                this.focussedTileIdx = undefined;
-                this.focussedTile = undefined;
+                this.unfocus();
             }
         }
     }
@@ -94,7 +83,31 @@ export class Renderer {
         this.getElements(game).forEach(element => element.draw(this.ctx));
     }
 
-    private getElements(game: Game) {
+    private handleClickOnElement(element: Element) {
+        if (!this.game) return;
+        const { tile, tileIdx } = (element as UnplayedTileRenderer);
+        const { gridX, gridY } = (element as HexagonRenderer);
+        if (tile && !isUndefined(tileIdx)) {
+            // clicking on an unplayed tile
+            this.focussedTile = tile;
+            this.focussedTileIdx = tileIdx;
+        } else if (!isUndefined(gridX) && !isUndefined(gridY)) {
+            // clicking on a hexagon
+            if (this.focussedTile && !isUndefined(this.focussedTileIdx)) {
+                this.game.placeTile(this.game.currentPlayer, this.focussedTileIdx, gridX, gridY);
+                this.unfocus();
+            }
+        } else {
+            this.unfocus();
+        }
+    }
+
+    private unfocus() {
+        this.focussedTile = undefined;
+        this.focussedTileIdx = undefined;
+    }
+
+    private getElements(game: Game): Element[] {
         const grid = game.board;
         const { hexRadius } = this;
         // render board

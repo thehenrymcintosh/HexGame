@@ -1,5 +1,5 @@
 import {Tile} from "./tile";
-import {matrix} from "./utils";
+import {isUndefined, matrix} from "./utils";
 
 export class Player {
     private _tiles: Tile[] = [];
@@ -120,8 +120,9 @@ export class Game {
         if (!tile) throw new Error("No tile to calculate!");
         const neighbourValues = this.getNeighbouringValuesTo(x,y);
         return tile.sides.reduce((points, sideValue, sideIndex) => {
-            if (neighbourValues[sideIndex] === sideValue) return points +1;
-            if (typeof neighbourValues[sideIndex] === "number") return points - 1;
+            const neighbouringSideValue = neighbourValues[sideIndex];
+            if (neighbouringSideValue === sideValue) return points +1;
+            if (!isUndefined(neighbouringSideValue)) return points -1;
             return points;
         }, 0)
     }

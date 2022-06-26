@@ -6,3 +6,7 @@ export function matrix<T>(m: number, n: number, defaultValue: T): T[][] {
         // and fill it with `0`
     }, () => new Array(n).fill(defaultValue));
 };
+
+export function isUndefined<T>(arg: T | undefined): arg is undefined {
+    return typeof arg === "undefined";
+}
