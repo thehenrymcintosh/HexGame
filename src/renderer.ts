@@ -24,7 +24,6 @@ export class Renderer {
     constructor() {
 
         window.onkeydown = (e) => {
-            console.log(e);
             if (this.focussedTile && e.key === "q" || e.key === "Q") {
                 this.focussedTile?.rotateCounterClockwise();
             } else if (this.focussedTile && e.key === "e" || e.key === "E"){
@@ -48,15 +47,12 @@ export class Renderer {
             if (clickedElement) {
                 const { tile, tileIdx } = (clickedElement as UnplayedTileRenderer);
                 const { gridX, gridY } = (clickedElement as HexagonRenderer);
-                console.log({tile, tileIdx, gridX, gridY});
                 if (tile && typeof tileIdx !== "undefined") {
                     this.focussedTile = tile;
                     this.focussedTileIdx = tileIdx;
-                    console.log({tile, tileIdx});
                 } else if (typeof gridX !== "undefined" && typeof gridY !== "undefined" ) {
                     // must be hexagon;
                     if (this.focussedTile && typeof this.focussedTileIdx !== "undefined") {
-                        console.log(this.game.currentPlayer);
                         this.game.placeTile(this.game.currentPlayer, this.focussedTileIdx, gridX, gridY);
 
                         this.focussedTile = undefined;

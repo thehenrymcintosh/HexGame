@@ -54,9 +54,25 @@ export class Game {
             // .slice(1) // remove 0 value tile to put in middle of board
             .sort(() => Math.random() - 0.5) // shuffle
             .map(val => new Tile(val));
-        this._board[3][3] = this.drawPile.pop();
+        this.setupBoardPerimeter();
         this.players = players;
         this.distributeTiles(4);
+    }
+
+    private setupBoardCentre() {
+        this.setTileAt(this.drawPile.pop(), 3, 3)
+    }
+
+    private setupBoardPerimeter() {
+        const farRowIdx = this._board.length -1;
+        for (let i = 0; i < this._board.length; i++) {
+            this.setTileAt(this.drawPile.pop(), i, 0)
+            this.setTileAt(this.drawPile.pop(), i, farRowIdx);
+        }
+        for (let i = 1; i < this._board.length-1; i++) {
+            this.setTileAt(this.drawPile.pop(), 0, i);
+            this.setTileAt(this.drawPile.pop(), farRowIdx, i);
+        }
     }
 
     get tilesRemaining() {
@@ -90,7 +106,9 @@ export class Game {
         this.currentPlayer.awardPoints(points);
         const drawnTile = this.drawPile.pop();
         if (drawnTile) this.currentPlayer.giveTile(drawnTile);
-        if (this.players.every(player => player.tiles.length === 0)) {
+        const everyoneIsOutOfTiles = this.players.every(player => player.tiles.length === 0);
+        const boardIsFull = this.board.every(row => row.every(cell => !!cell));
+        if (boardIsFull || everyoneIsOutOfTiles) {
             alert(`Game over, final points: ${this.players.map(player => player.toString()).join(", ")}`)
         }
         this.currentPlayerIndex += 1;
@@ -103,6 +121,7 @@ export class Game {
         const neighbourValues = this.getNeighbouringValuesTo(x,y);
         return tile.sides.reduce((points, sideValue, sideIndex) => {
             if (neighbourValues[sideIndex] === sideValue) return points +1;
+            if (typeof neighbourValues[sideIndex] === "number") return points - 1;
             return points;
         }, 0)
     }
@@ -145,7 +164,7 @@ export class Game {
         return this._board[y][x];
     }
 
-    setTileAt(tile: Tile, x: number, y: number) {
+    setTileAt(tile: Tile | undefined, x: number, y: number) {
         this._board[y][x] = tile;
     }
 
