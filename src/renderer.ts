@@ -147,6 +147,14 @@ class CellRenderer implements Drawable, Clickable {
 
     draw(ctx: CanvasRenderingContext2D) {
         this.hexagonRenderer.draw(ctx);
+        const { text } = this.cell.options;
+        if (text) {
+            const [x,y] = this.hexagonRenderer.getMidpoint();
+            const offset = (text.length/2) * 3.5; // px to move left
+            ctx.fillStyle = "black";
+            ctx.font = "8px Ariel";
+            ctx.fillText(text, x - offset,y + 3)
+        }
     }
 
     isWithinBounds(point: { x: number, y: number }): boolean {
@@ -157,7 +165,7 @@ class CellRenderer implements Drawable, Clickable {
         if (isHovering){
             this.hexagonRenderer.setFill("red");
         } else {
-            this.hexagonRenderer.setFill("transparent");
+            this.hexagonRenderer.setFill(this.cell.options.color);
         }
     }
 }

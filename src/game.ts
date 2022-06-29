@@ -1,5 +1,6 @@
 import {Tile} from "./tile";
 import {isUndefined, matrix} from "./utils";
+import {options} from "tsconfig-paths/lib/options";
 
 export class Player {
     private _tiles: Tile[] = [];
@@ -38,11 +39,44 @@ export class Player {
     }
 }
 
+type CellOptions = {
+    color: string;
+    text: string;
+    pointsMultiplier: number;
+}
+
+const normalCell: CellOptions = {
+    color: "transparent",
+    text: "",
+    pointsMultiplier: 1,
+}
+
+const doublePoints: CellOptions = {
+    color: "lightblue",
+    text: "Double Points",
+    pointsMultiplier: 2,
+}
+
+
+const triplePoints: CellOptions = {
+    color: "gold",
+    text: "Triple Points",
+    pointsMultiplier: 3,
+}
+
 export class Cell {
-    constructor(readonly x: number, readonly y: number, private _contents: Tile | undefined) {}
+    constructor(readonly x: number, readonly y: number, private _contents: Tile | undefined, private _options = normalCell) {}
 
     get contents() {
         return this._contents;
+    }
+
+    get options() {
+        return this._options;
+    }
+
+    setOptions(options: CellOptions) {
+        this._options = options;
     }
 
     setContents(contents: Tile | undefined) {
@@ -67,7 +101,7 @@ export class Game {
     constructor(players: Player[]) {
         if (players.length < 2) throw new Error("Minimum 2 players!");
         if (players.length > 4) throw new Error("Maximum 4 players!");
-        this._board = new Array(64).fill(0).map((cell, i) => Cell.Empty(i % 8, Math.floor(i / 8)));
+        this._board = this.createBoard();
         this.drawPile = new Array(64)
             .fill(0)
             .map((val, i) => i)
@@ -76,6 +110,19 @@ export class Game {
             .map(val => new Tile(val));
         this.players = players;
         this.distributeTiles(4);
+    }
+
+    createBoard(): Cell[] {
+        return new Array(64)
+            .fill(0)
+            .map((cell, i) => Cell.Empty(i % 8, Math.floor(i / 8)))
+            .map(cell => {
+                if (cell.x === 3 && cell.y === 1) cell.setOptions(triplePoints);
+                if (cell.x === 4 && cell.y === 6) cell.setOptions(triplePoints);
+                if (cell.x === 2 && cell.y === 4) cell.setOptions(doublePoints);
+                if (cell.x === 5 && cell.y === 3) cell.setOptions(doublePoints);
+                return cell;
+            });
     }
 
     setupBoard() {
@@ -146,7 +193,8 @@ export class Game {
     }
 
     private calculatePointsForTile(x: number, y: number): number {
-        const tile = this.getTileAt(x,y);
+        const cell = this.getCellAt(x,y);
+        const tile = cell?.contents;
         if (!tile) throw new Error("No tile to calculate!");
         const neighbourValues = this.getNeighbouringValuesTo(x,y);
         return tile.sides.reduce((points, sideValue, sideIndex) => {
@@ -154,7 +202,7 @@ export class Game {
             if (neighbouringSideValue === sideValue) return points +1;
             if (!isUndefined(neighbouringSideValue)) return points -1;
             return points;
-        }, 0)
+        }, 0) * cell.options.pointsMultiplier;
     }
 
     private getNeighbouringValuesTo(x: number, y: number): (number|undefined)[] {
