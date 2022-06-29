@@ -117,10 +117,10 @@ export class Game {
             .fill(0)
             .map((cell, i) => Cell.Empty(i % 8, Math.floor(i / 8)))
             .map(cell => {
-                if (cell.x === 3 && cell.y === 1) cell.setOptions(triplePoints);
-                if (cell.x === 4 && cell.y === 6) cell.setOptions(triplePoints);
-                if (cell.x === 2 && cell.y === 4) cell.setOptions(doublePoints);
-                if (cell.x === 5 && cell.y === 3) cell.setOptions(doublePoints);
+                if (cell.x === 3 && cell.y === 1) cell.setOptions(doublePoints);
+                if (cell.x === 4 && cell.y === 6) cell.setOptions(doublePoints);
+                if (cell.x === 2 && cell.y === 4) cell.setOptions(triplePoints);
+                if (cell.x === 5 && cell.y === 3) cell.setOptions(triplePoints);
                 return cell;
             });
     }
