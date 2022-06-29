@@ -38,7 +38,7 @@ export class Player {
     }
 }
 
-class Cell {
+export class Cell {
     constructor(readonly x: number, readonly y: number, private _contents: Tile | undefined) {}
 
     get contents() {
