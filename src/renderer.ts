@@ -113,25 +113,22 @@ export class Renderer {
         // render board
         const elements : (Drawable & Clickable)[] = [];
 
-        for (let gridY = 0; gridY < grid.length; gridY++) {
-            for (let gridX = 0; gridX < grid[0].length; gridX++) {
-                const tile = game.getTileAt(gridX, gridY);
-                if (tile) {
-                    elements.push(new PlayedTileRenderer(gridX,gridY,hexRadius, tile));
-                } else {
-                    const element = new HexagonRenderer(gridX,gridY,hexRadius);
-                    if (element.isWithinBounds(this.mousePosition)) {
-                        element.setFill("red")
-                    }
-                    elements.push(element);
+        game.board.forEach(cell => {
+            const {contents, x, y} = cell;
+            if (contents) {
+                elements.push(new PlayedTileRenderer(x,y,hexRadius, contents));
+            } else {
+                const element = new HexagonRenderer(x,y,hexRadius);
+                if (element.isWithinBounds(this.mousePosition)) {
+                    element.setFill("red")
                 }
+                elements.push(element);
             }
-
-        }
+        })
 
         // render tiles for current player
         game.currentPlayer.tiles.forEach((tile, idx) => {
-            const element = new UnplayedTileRenderer(idx, game.board.length + 2,hexRadius, tile);
+            const element = new UnplayedTileRenderer(idx, 8 + 2,hexRadius, tile);
             if (tile === this.focussedTile) {
                 element.setFill("blue");
             } else if (element.isWithinBounds(this.mousePosition)) {

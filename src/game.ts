@@ -38,8 +38,28 @@ export class Player {
     }
 }
 
+class Cell {
+    constructor(readonly x: number, readonly y: number, private _contents: Tile | undefined) {}
+
+    get contents() {
+        return this._contents;
+    }
+
+    setContents(contents: Tile | undefined) {
+        this._contents = contents;
+    }
+
+    isOccupied() {
+        return !!this.contents;
+    }
+
+    static Empty(x: number, y: number) {
+        return new Cell(x, y, undefined);
+    }
+}
+
 export class Game {
-    private readonly _board: (Tile | undefined)[][];
+    private readonly _board: Cell[];
     readonly players: Player[];
     private currentPlayerIndex: number = 0;
     private drawPile: Tile[];
@@ -47,7 +67,7 @@ export class Game {
     constructor(players: Player[]) {
         if (players.length < 2) throw new Error("Minimum 2 players!");
         if (players.length > 4) throw new Error("Maximum 4 players!");
-        this._board = matrix(8, 8, undefined);
+        this._board = new Array(64).fill(0).map((cell, i) => Cell.Empty(i % 8, Math.floor(i / 8)));
         this.drawPile = new Array(64)
             .fill(0)
             .map((val, i) => i)
@@ -73,12 +93,13 @@ export class Game {
     }
 
     private setupBoardPerimeter() {
-        const farRowIdx = this._board.length -1;
-        for (let i = 0; i < this._board.length; i++) {
+        const gridWidth = 8;
+        const farRowIdx = gridWidth -1;
+        for (let i = 0; i < gridWidth; i++) {
             this.setTileAt(this.drawPile.pop(), i, 0)
             this.setTileAt(this.drawPile.pop(), i, farRowIdx);
         }
-        for (let i = 1; i < this._board.length-1; i++) {
+        for (let i = 1; i < gridWidth-1; i++) {
             this.setTileAt(this.drawPile.pop(), 0, i);
             this.setTileAt(this.drawPile.pop(), farRowIdx, i);
         }
@@ -116,7 +137,7 @@ export class Game {
         const drawnTile = this.drawPile.pop();
         if (drawnTile) this.currentPlayer.giveTile(drawnTile);
         const everyoneIsOutOfTiles = this.players.every(player => player.tiles.length === 0);
-        const boardIsFull = this.board.every(row => row.every(cell => !!cell));
+        const boardIsFull = this.board.every(cell => cell.isOccupied());
         if (boardIsFull || everyoneIsOutOfTiles) {
             alert(`Game over, final points: ${this.players.map(player => player.toString()).join(", ")}`)
         }
@@ -170,29 +191,18 @@ export class Game {
     }
 
     getTileAt(x: number, y: number) {
-        if (!this.isValidPosition(x,y)) return;
-        return this._board[y][x];
+        return this.getCellAt(x,y)?.contents;
     }
 
     setTileAt(tile: Tile | undefined, x: number, y: number) {
-        this._board[y][x] = tile;
+        this.getCellAt(x,y)?.setContents(tile);
+    }
+
+    private getCellAt(x: number, y: number) {
+        return this._board.find(cell => cell.x === x && cell.y === y);
     }
 
     private isValidPosition(x: number, y: number) {
-        if (x < 0) return false;
-        if (y < 0) return false;
-        if (y >= this.board.length) return false;
-        if (x >= this.board[0].length) return false;
-        return true;
-    }
-
-    print() {
-        this.players.forEach(player => console.log(player.toString()));
-
-        this._board.map((row, rowIndex) => {
-            const isOdd = rowIndex % 2 === 1;
-            const spacing = isOdd ? " " : "";
-            console.log(`${spacing}${row.map(tile => !!tile ? 1 : 0).join(".")}`);
-        })
+        return !!this.getCellAt(x, y);
     }
 }
